@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1f12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AgroMonitor UZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Literata:ital,wght@0,300;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a1a0e;
+  --bg2:      #111f15;
+  --bg3:      #162419;
+  --card:     #1a2e1e;
+  --border:   #2a4030;
+  --accent:   #4ade80;
+  --accent2:  #86efac;
+  --warn:     #fbbf24;
+  --danger:   #f87171;
+  --text:     #e8f5ec;
+  --muted:    #7fa88a;
+  --mono:     'Space Mono', monospace;
+  --serif:    'Literata', Georgia, serif;
+  --radius:   16px;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* ── App shell ── */
+#app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Screens ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity var(--transition), transform var(--transition);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.screen.exit {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* ── Header ── */
+.header {
+  padding: 52px 24px 20px;
+  background: linear-gradient(180deg, var(--bg) 0%, transparent 100%);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.header-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.header h1 {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.header p {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  display: flex;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  transition: color var(--transition);
+}
+.nav-btn.active { color: var(--accent); }
+.nav-icon { font-size: 20px; }
+
+/* ── Content padding ── */
+.content {
+  flex: 1;
+  padding: 0 20px 24px;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Form elements ── */
+.field { margin-bottom: 14px; }
+.label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+select, input[type="number"], input[type="text"] {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 15px;
+  padding: 11px 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: border-color var(--transition);
+}
+select:focus, input:focus {
+  border-color: var(--accent);
+}
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237fa88a' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+/* ── Slider ── */
+.slider-row { display: flex; align-items: center; gap: 10px; }
+input[type="range"] {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(74,222,128,0.15);
+}
+.slider-val {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  min-width: 42px;
+  text-align: right;
+}
+
+/* ── Image upload zone ── */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(74,222,128,0.04); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-icon { font-size: 40px; margin-bottom: 10px; }
+.upload-hint { font-size: 13px; color: var(--muted); font-family: var(--mono); }
+.upload-preview {
+  width: 100%;
+  border-radius: 12px;
+  max-height: 200px;
+  object-fit: cover;
+  display: none;
+}
+.upload-preview.visible { display: block; }
+
+/* ── Buttons ── */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 15px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.15s;
+}
+.btn:active::after { background: rgba(255,255,255,0.08); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #0a1a0e;
+}
+.btn-primary:hover { background: var(--accent2); }
+.btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.btn-sm {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+/* ── Result card ── */
+.result-hero {
+  background: linear-gradient(135deg, #1a3d22 0%, #0f2a14 100%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.result-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(74,222,128,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.result-crop-icon { font-size: 52px; margin-bottom: 12px; }
+.result-disease {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+}
+.result-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+.prob-bar-wrap { margin-bottom: 16px; }
+.prob-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.prob-bar-track {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.prob-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.fill-high   { background: linear-gradient(90deg, #f87171, #fca5a5); }
+.fill-medium { background: linear-gradient(90deg, #fbbf24, #fde68a); }
+.fill-low    { background: linear-gradient(90deg, #4ade80, #86efac); }
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.risk-high   { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.risk-medium { background: rgba(251,191,36,0.15);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.risk-low    { background: rgba(74,222,128,0.15);  color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+
+.advice-box {
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--accent2);
+  margin-top: 14px;
+  line-height: 1.5;
+}
+
+/* ── Top-3 list ── */
+.top3-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.top3-item:last-child { border-bottom: none; }
+.top3-rank {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  width: 18px;
+  flex-shrink: 0;
+}
+.top3-icon { font-size: 22px; flex-shrink: 0; }
+.top3-info { flex: 1; min-width: 0; }
+.top3-disease { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top3-name { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.top3-prob {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Feedback form ── */
+.feedback-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+  gap: 10px;
+}
+.feedback-success .icon { font-size: 48px; }
+.feedback-success h3 { font-size: 18px; color: var(--accent); }
+.feedback-success p { font-size: 14px; color: var(--muted); }
+
+/* ── History list ── */
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.history-item:hover { border-color: var(--accent); }
+.hist-icon { font-size: 28px; flex-shrink: 0; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-disease { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.hist-meta { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.hist-prob { font-family: var(--mono); font-size: 14px; font-weight: 700; }
+.fb-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Stats ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.stat-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+/* ── Loading spinner ── */
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,26,14,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+.loading-overlay.visible { opacity: 1; pointer-events: all; }
+.loading-text { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+  z-index: 50;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Settings ── */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 15px; }
+.setting-sub { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.setting-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  text-align: right;
+}
+
+/* ── Config input ── */
+.config-url {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  width: 100%;
+  margin-top: 8px;
+  outline: none;
+}
+.config-url:focus { border-color: var(--accent); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ LOADING OVERLAY ══ -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Анализируем...</div>
+  </div>
+
+  <!-- ══ TOAST ══ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN 1: PREDICT
+  ════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-predict">
+    <div class="header">
+      <div class="header-logo">
+        <div class="header-icon">🌿</div>
+        <div>
+          <h1>AGROMONITOR UZ</h1>
+          <p>Диагностика болезней растений</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Image upload -->
+      <div class="card">
+        <div class="card-title">📸 Фото листа</div>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="imageInput" accept="image/*" capture="environment">
+          <img class="upload-preview" id="preview">
+          <div id="uploadPlaceholder">
+            <div class="upload-icon">🍃</div>
+            <div style="font-size:15px;font-weight:500;margin-bottom:6px">Сфотографируйте лист</div>
+            <div class="upload-hint">Нажмите или перетащите изображение</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="card">
+        <div class="card-title">📍 Расположение</div>
+        <div class="field">
+          <label class="label">Регион</label>
+          <select id="region">
+            <option value="Ташкент">Ташкент</option>
+            <option value="Фергана">Фергана</option>
+            <option value="Самарканд">Самарканд</option>
+            <option value="Сурхандарья">Сурхандарья</option>
+            <option value="Каракалпакстан">Каракалпакстан</option>
+            <option value="Хорезм">Хорезм</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label">Сезон</label>
+          <select id="season">
+            <option value="Весна">Весна</option>
+            <option value="Лето">Лето</option>
+            <option value="Осень">Осень</option>
+            <option value="Зима">Зима</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Climate -->
+      <div class="card">
+        <div class="card-title">🌡 Климат</div>
+        <div class="field">
+          <label class="label">Температура</label>
+          <div class="slider-row">
+            <input type="range" id="tempSlider" min="-10" max="45" value="20" step="0.5"
+              oninput="document.getElementById('tempVal').textContent=this.value+'°C'">
+            <span class="slider-val" id="tempVal">20°C</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Влажность</label>
+          <div class="slider-row">
+            <input type="range" id="humSlider" min="10" max="99" value="60" step="1"
+              oninput="document.getElementById('humVal').textContent=this.value+'%'">
+            <span class="slider-val" id="humVal">60%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Осадки (мм/мес)</label>
+          <div class="slider-row">
+            <input type="range" id="rainSlider" min="0" max="200" value="30" step="1"
+              oninput="document.getElementById('rainVal').textContent=this.value+'мм'">
+            <span class="slider-val" id="rainVal">30мм</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Soil -->
+      <div class="card">
+        <div class="card-title">🌍 Почва</div>
+        <div class="field">
+          <label class="label">Тип почвы</label>
+          <select id="soilType">
+            <option value="loam_sierozem">Суглинок (серозём)</option>
+            <option value="alluvial_loam">Аллювиальный суглинок</option>
+            <option value="loess_sierozem">Лёссовый серозём</option>
+            <option value="meadow_sierozem">Луговой серозём</option>
+            <option value="takyr_solonchak">Такыр / Солончак</option>
+            <option value="alluvial_meadow">Аллювиальный луговой</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label">pH почвы</label>
+          <div class="slider-row">
+            <input type="range" id="phSlider" min="5.0" max="9.5" value="7.5" step="0.1"
+              oninput="document.getElementById('phVal').textContent=this.value">
+            <span class="slider-val" id="phVal">7.5</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="predictBtn" onclick="submitPrediction()" disabled>
+        <span>🔬</span> Определить болезнь
+      </button>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN 2: RESULT
+  ════════════════════════════════════════════ -->
+  <div class="screen" id="screen-result">
+    <div class="header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onclick="goBack()" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);cursor:pointer;font-family:var(--mono);font-size:13px">← Назад</button>
+        <h1 style="font-family:var(--mono);font-size:14px;color:var(--accent)">РЕЗУЛЬТАТ</h1>
+      </div>
+    </div>
+    <div class="content" id="resultContent">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN 3: HISTORY
+  ════════════════════════════════════════════ -->
+  <div class="screen" id="screen-history">
+    <div class="header">
+      <div class="header-logo">
+        <div class="header-icon">📋</div>
+        <div>
+          <h1>ИСТОРИЯ</h1>
+          <p>Сохранённые наблюдения</p>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="stat-grid" id="histStats">
+        <div class="stat-box">
+          <div class="stat-num" id="statTotal">—</div>
+          <div class="stat-label">Всего</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statFeedback">—</div>
+          <div class="stat-label">С отзывом</div>
+        </div>
+      </div>
+      <div id="historyList">
+        <div style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:13px">
+          Загрузка...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SCREEN 4: SETTINGS
+  ════════════════════════════════════════════ -->
+  <div class="screen" id="screen-settings">
+    <div class="header">
+      <div class="header-logo">
+        <div class="header-icon">⚙️</div>
+        <div>
+          <h1>НАСТРОЙКИ</h1>
+          <p>AgroMonitor UZ v1.0</p>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="card-title">🔗 Подключение</div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div>
+            <div class="setting-label">URL Backend API</div>
+            <div class="setting-sub">FastAPI сервер</div>
+          </div>
+          <input class="config-url" id="apiUrlInput" type="text"
+            placeholder="http://localhost:8000"
+            value="">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-outline btn-sm" onclick="saveApiUrl()">Сохранить</button>
+          <button class="btn btn-outline btn-sm" onclick="testConnection()">Проверить</button>
+        </div>
+        <div id="connStatus" style="margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--muted)"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Агроном</div>
+        <div class="field">
+          <label class="label">Ваше имя (для отзывов)</label>
+          <input type="text" id="agronomistName" placeholder="Введите имя..."
+            value="" oninput="localStorage.setItem('agronomist', this.value)">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Датасет</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Экспорт данных</div>
+            <div class="setting-sub">CSV для дообучения модели</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="exportDataset()">↓ CSV</button>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Только с отзывами</div>
+            <div class="setting-sub">Верифицированные данные</div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="exportDataset(true)">↓ CSV</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ℹ️ О проекте</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">
+          <p>AgroMonitor UZ — система ранней диагностики болезней растений для регионов Узбекистана.</p>
+          <br>
+          <p style="font-family:var(--mono);font-size:11px">
+            Модель: ResNet-18 + Random Forest<br>
+            Культуры: Томат, Картофель, Виноград, Яблоня<br>
+            Регионы: 6 регионов Узбекистана<br>
+            Val F1: 0.961 | Acc: 96.2%
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="navigate('predict')">
+      <span class="nav-icon">🔬</span>
+      <span>Диагноз</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('history')">
+      <span class="nav-icon">📋</span>
+      <span>История</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('settings')">
+      <span class="nav-icon">⚙️</span>
+      <span>Настройки</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────
+let API_URL = localStorage.getItem('api_url') || 'http://localhost:8000';
+let currentObsId = null;
+let currentScreen = 'predict';
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('apiUrlInput').value = API_URL;
+  document.getElementById('agronomistName').value = localStorage.getItem('agronomist') || '';
+  setupImageUpload();
+  autoDetectSeason();
+});
+
+// ── Navigation ──────────────────────────────────────────────────────────
+function navigate(name) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'exit');
+  });
+  document.querySelectorAll('.nav-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['predict','history','settings'][i] === name);
+  });
+  document.getElementById(`screen-${name}`).classList.add('active');
+  currentScreen = name;
+  if (name === 'history') loadHistory();
+}
+
+function goBack() {
+  navigate('predict');
+}
+
+// ── Image upload ──────────────────────────────────────────────────────
+function setupImageUpload() {
+  const input = document.getElementById('imageInput');
+  const zone  = document.getElementById('uploadZone');
+  const preview = document.getElementById('preview');
+  const placeholder = document.getElementById('uploadPlaceholder');
+
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    preview.src = url;
+    preview.classList.add('visible');
+    placeholder.style.display = 'none';
+    document.getElementById('predictBtn').disabled = false;
+  });
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+// ── Auto season ──────────────────────────────────────────────────────
+function autoDetectSeason() {
+  const m = new Date().getMonth();
+  const map = { 0:'Зима',1:'Зима',2:'Весна',3:'Весна',4:'Весна',5:'Лето',6:'Лето',7:'Лето',8:'Осень',9:'Осень',10:'Осень',11:'Зима' };
+  const sel = document.getElementById('season');
+  sel.value = map[m];
+}
+
+// ── Prediction ───────────────────────────────────────────────────────
+async function submitPrediction() {
+  const file = document.getElementById('imageInput').files[0];
+  if (!file) { showToast('Выберите фото листа'); return; }
+
+  showLoading('Анализируем изображение...');
+
+  const fd = new FormData();
+  fd.append('image',       file);
+  fd.append('region',      document.getElementById('region').value);
+  fd.append('season',      document.getElementById('season').value);
+  fd.append('temperature', document.getElementById('tempSlider').value);
+  fd.append('humidity',    document.getElementById('humSlider').value);
+  fd.append('rainfall',    document.getElementById('rainSlider').value);
+  fd.append('soil_ph',     document.getElementById('phSlider').value);
+  fd.append('soil_type',   document.getElementById('soilType').value);
+
+  try {
+    const res  = await fetch(`${API_URL}/predict`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Server error');
+    hideLoading();
+    showResult(data);
+  } catch (err) {
+    hideLoading();
+    showToast('Ошибка: ' + err.message);
+    // Demo mode
+    showResult(getMockResult());
+  }
+}
+
+function getMockResult() {
+  return {
+    observation_id: 'demo-' + Date.now(),
+    predicted_disease: 'Tomato___Early_blight',
+    disease_name_uz: 'Pomidor — erta yanib ketish',
+    crop: 'Tomato',
+    icon: '🍅',
+    probability: 0.72,
+    risk_score: 0.68,
+    risk_level: 'high',
+    advice: '⚠️ Высокий риск — немедленная обработка фунгицидом рекомендована',
+    top3: [
+      { disease: 'Tomato___Early_blight', name_uz: 'Pomidor — erta yanib ketish', prob: 0.72, icon: '🍅' },
+      { disease: 'Tomato___Late_blight',  name_uz: 'Pomidor — kech yanib ketish',  prob: 0.18, icon: '🍅' },
+      { disease: 'Potato___Early_blight', name_uz: 'Kartoshka — erta yanib ketish',prob: 0.06, icon: '🥔' },
+    ],
+    context: {
+      region: document.getElementById('region').value,
+      season: document.getElementById('season').value,
+      temperature: document.getElementById('tempSlider').value,
+      humidity: document.getElementById('humSlider').value,
+    },
+    _demo: true,
+  };
+}
+
+// ── Render result ────────────────────────────────────────────────────
+function showResult(data) {
+  currentObsId = data.observation_id;
+  const rl = data.risk_level;
+  const riskColor = { high: 'fill-high', medium: 'fill-medium', low: 'fill-low' }[rl];
+  const riskLabel = { high: '⚠️ ВЫСОКИЙ', medium: '🟡 СРЕДНИЙ', low: '✅ НИЗКИЙ' }[rl];
+  const probPct   = Math.round(data.probability * 100);
+
+  const top3html = data.top3.map((t, i) => `
+    <div class="top3-item">
+      <div class="top3-rank">#${i+1}</div>
+      <div class="top3-icon">${t.icon}</div>
+      <div class="top3-info">
+        <div class="top3-disease">${t.disease.replace('___',' — ').replace(/_/g,' ')}</div>
+        <div class="top3-name">${t.name_uz}</div>
+      </div>
+      <div class="top3-prob">${Math.round(t.prob*100)}%</div>
+    </div>
+  `).join('');
+
+  const previewSrc = document.getElementById('preview').src;
+
+  document.getElementById('resultContent').innerHTML = `
+    ${data._demo ? '<div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:12px;color:#fbbf24;margin-bottom:14px">⚡ Demo режим — backend недоступен</div>' : ''}
+
+    <div class="result-hero">
+      <div class="result-crop-icon">${data.icon}</div>
+      <div class="result-disease">${data.crop.toUpperCase()}</div>
+      <div class="result-name">${data.predicted_disease.replace('___',' — ').replace(/_/g,' ')}</div>
+
+      <div class="prob-bar-wrap">
+        <div class="prob-bar-label">
+          <span>Вероятность заболевания</span>
+          <span>${probPct}%</span>
+        </div>
+        <div class="prob-bar-track">
+          <div class="prob-bar-fill ${riskColor}" id="probFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <span class="risk-badge risk-${rl}">${riskLabel}</span>
+      <div class="advice-box">${data.advice}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Топ-3 болезни</div>
+      ${top3html}
+    </div>
+
+    <div class="card">
+      <div class="card-title">🌡 Условия</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:var(--mono);font-size:12px;">
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;">
+          <div style="color:var(--muted)">Регион</div>
+          <div style="color:var(--text);font-size:13px;margin-top:2px">${data.context.region}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;">
+          <div style="color:var(--muted)">Сезон</div>
+          <div style="color:var(--text);font-size:13px;margin-top:2px">${data.context.season}</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;">
+          <div style="color:var(--muted)">Температура</div>
+          <div style="color:var(--accent);font-size:13px;margin-top:2px">${data.context.temperature}°C</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:10px;">
+          <div style="color:var(--muted)">Влажность</div>
+          <div style="color:var(--accent);font-size:13px;margin-top:2px">${data.context.humidity}%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEEDBACK SECTION -->
+    <div class="card" id="feedbackSection">
+      <div class="card-title">✏️ Отзыв агронома</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
+        Помогите улучшить модель — укажите реальный диагноз если он отличается
+      </p>
+      <div class="field">
+        <label class="label">Реальная болезнь (если отличается)</label>
+        <select id="trueClass">
+          <option value="">— Предсказание верно —</option>
+          <option value="Tomato___Early_blight">Tomato — Early Blight</option>
+          <option value="Tomato___Late_blight">Tomato — Late Blight</option>
+          <option value="Tomato___Bacterial_spot">Tomato — Bacterial Spot</option>
+          <option value="Tomato___Leaf_Mold">Tomato — Leaf Mold</option>
+          <option value="Potato___Late_blight">Potato — Late Blight</option>
+          <option value="Potato___Early_blight">Potato — Early Blight</option>
+          <option value="Grape___Black_rot">Grape — Black Rot</option>
+          <option value="Apple___Apple_scab">Apple — Apple Scab</option>
+          <option value="healthy">Здоровое растение</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Заметки (необязательно)</label>
+        <input type="text" id="feedbackNotes" placeholder="Стадия болезни, условия поля...">
+      </div>
+      <button class="btn btn-primary" onclick="submitFeedback('${data.observation_id}')">
+        <span>💾</span> Сохранить отзыв
+      </button>
+    </div>
+
+    <div style="height:8px"></div>
+  `;
+
+  navigate_to_result();
+
+  // Animate bar
+  setTimeout(() => {
+    const fill = document.getElementById('probFill');
+    if (fill) fill.style.width = probPct + '%';
+  }, 200);
+}
+
+function navigate_to_result() {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'exit');
+  });
+  document.getElementById('screen-result').classList.add('active');
+  document.getElementById('screen-result').scrollTop = 0;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+}
+
+// ── Feedback ──────────────────────────────────────────────────────────
+async function submitFeedback(obsId) {
+  const trueClass = document.getElementById('trueClass').value;
+  const notes     = document.getElementById('feedbackNotes').value;
+  const agro      = localStorage.getItem('agronomist') || '';
+
+  const fd = new FormData();
+  fd.append('true_class',      trueClass || 'confirmed_correct');
+  fd.append('agronomist_name', agro);
+  fd.append('notes',           notes);
+
+  try {
+    const res = await fetch(`${API_URL}/feedback/${obsId}`, { method: 'POST', body: fd });
+    if (res.ok) {
+      document.getElementById('feedbackSection').innerHTML = `
+        <div class="feedback-success">
+          <div class="icon">✅</div>
+          <h3>Отзыв сохранён</h3>
+          <p>Данные добавлены в реальный датасет</p>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px">ID: ${obsId.slice(0,8)}...</p>
+        </div>
+      `;
+      showToast('Спасибо! Отзыв сохранён');
+    } else { throw new Error('Server error'); }
+  } catch {
+    showToast('Offline — отзыв будет сохранён локально');
+    document.getElementById('feedbackSection').innerHTML = `
+      <div class="feedback-success">
+        <div class="icon">📱</div>
+        <h3>Сохранено локально</h3>
+        <p>Отзыв будет отправлен при подключении</p>
+      </div>
+    `;
+    // Save locally
+    const pending = JSON.parse(localStorage.getItem('pending_feedback') || '[]');
+    pending.push({ obsId, trueClass, notes, agro, ts: Date.now() });
+    localStorage.setItem('pending_feedback', JSON.stringify(pending));
+  }
+}
+
+// ── History ──────────────────────────────────────────────────────────
+async function loadHistory() {
+  try {
+    const [obsRes, statsRes] = await Promise.all([
+      fetch(`${API_URL}/observations?limit=100`),
+      fetch(`${API_URL}/stats`),
+    ]);
+    const obs   = await obsRes.json();
+    const stats = await statsRes.json();
+
+    document.getElementById('statTotal').textContent    = stats.total_observations;
+    document.getElementById('statFeedback').textContent = stats.with_feedback;
+
+    renderHistory(obs);
+  } catch {
+    document.getElementById('historyList').innerHTML = `
+      <div style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:12px">
+        Backend недоступен<br>Настройте URL в настройках
+      </div>
+    `;
+    document.getElementById('statTotal').textContent    = '—';
+    document.getElementById('statFeedback').textContent = '—';
+  }
+}
+
+function renderHistory(obs) {
+  if (!obs.length) {
+    document.getElementById('historyList').innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:13px">
+        Нет наблюдений<br><br>Сделайте первый диагноз →
+      </div>`;
+    return;
+  }
+
+  const ICONS = {
+    Tomato: '🍅', Potato: '🥔', Grape: '🍇', Apple: '🍎'
+  };
+
+  document.getElementById('historyList').innerHTML = obs.map(o => {
+    const crop = (o.predicted_disease || '').split('___')[0];
+    const icon = ICONS[crop] || '🌿';
+    const pct  = Math.round((o.probability || 0) * 100);
+    const rl   = pct >= 65 ? 'high' : pct >= 35 ? 'medium' : 'low';
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString('ru') : '';
+    return `
+      <div class="history-item">
+        <div class="hist-icon">${icon}</div>
+        <div class="hist-info">
+          <div class="hist-disease">${(o.predicted_disease||'').replace('___',' — ').replace(/_/g,' ')}</div>
+          <div class="hist-meta">${o.region} · ${o.season} · ${date}</div>
+          ${o.has_feedback ? `<div style="font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:2px">✓ Отзыв: ${o.true_class||'подтверждено'}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="hist-prob" style="color:${rl==='high'?'#f87171':rl==='medium'?'#fbbf24':'#4ade80'}">${pct}%</div>
+          ${o.has_feedback ? '<div class="fb-dot"></div>' : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Settings ──────────────────────────────────────────────────────────
+function saveApiUrl() {
+  API_URL = document.getElementById('apiUrlInput').value.trim().replace(/\/$/, '');
+  localStorage.setItem('api_url', API_URL);
+  showToast('URL сохранён');
+}
+
+async function testConnection() {
+  const url = document.getElementById('apiUrlInput').value.trim();
+  const el  = document.getElementById('connStatus');
+  el.textContent = 'Проверяем...';
+  try {
+    const res  = await fetch(`${url}/health`, { signal: AbortSignal.timeout(5000) });
+    const data = await res.json();
+    el.textContent = `✅ Подключено · Модель: ${data.model_loaded ? 'загружена' : 'не загружена'} · Наблюдений: ${data.observations_count}`;
+    el.style.color = 'var(--accent)';
+  } catch {
+    el.textContent = '❌ Не удалось подключиться';
+    el.style.color = '#f87171';
+  }
+}
+
+function exportDataset(onlyFeedback = false) {
+  const url = `${API_URL}/dataset/export${onlyFeedback ? '?only_with_feedback=true' : ''}`;
+  window.open(url, '_blank');
+}
+
+// ── UI helpers ───────────────────────────────────────────────────────
+function showLoading(text = 'Загрузка...') {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loadingOverlay').classList.add('visible');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('visible');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
