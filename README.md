@@ -110,6 +110,7 @@ GET /dataset/export → CSV для дообучения модели
 ## Экспорт датасета для дообучения
 
 ```bash
+lint to the model https://github.com/Xondamir-777/Graduation_ML.git
 # Все наблюдения
 curl http://localhost:8000/dataset/export > real_dataset.csv
 
@@ -125,3 +126,6 @@ real      = pd.read_csv("real_dataset.csv")
 combined  = pd.concat([synthetic, real], ignore_index=True)
 combined.to_csv("data/combined_dataset.csv", index=False)
 ```
+
+
+
